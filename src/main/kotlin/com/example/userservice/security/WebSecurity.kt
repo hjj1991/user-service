@@ -23,6 +23,7 @@ class WebSecurity(
 
         http.authorizeRequests()
             .antMatchers("/error/**").permitAll()
+            .antMatchers("/actuator/**").permitAll()
             .antMatchers("/**").access("hasIpAddress('127.0.0.1')")
             .and()
             .addFilter(AuthenticationFilter(authenticationManager, env, userService))
