@@ -36,3 +36,6 @@ management:
 #token:
 #  expiration_time: 86400000
 #  secret: user_tokentwetwetwetwetweEDRHQstgjeorsgjWGWtoesrethmksprghjktpseorjgtopesjrgo
+logging:
+  level:
+    com.example.userservice.client: DEBUG
