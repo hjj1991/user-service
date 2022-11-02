@@ -10,6 +10,9 @@ import org.springframework.stereotype.Service
 import org.modelmapper.ModelMapper
 import org.modelmapper.convention.MatchingStrategies
 import org.slf4j.LoggerFactory
+import org.springframework.cloud.client.circuitbreaker.AbstractCircuitBreakerFactory
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory
+import org.springframework.cloud.client.circuitbreaker.ConfigBuilder
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.core.env.Environment
 import org.springframework.http.HttpMethod
@@ -27,6 +30,7 @@ class UserServiceImpl(
     private val restTemplate: RestTemplate,
     private val env: Environment,
     private val orderServiceClient: OrderServiceClient,
+    private val circuitBreakerFactory: CircuitBreakerFactory<*, *>,
 ): UserService {
     private val log = LoggerFactory.getLogger(UserServiceImpl::class.java)
     override fun createUser(userDto: UserDto): UserDto? {
@@ -63,7 +67,14 @@ class UserServiceImpl(
 //                is FeignException -> log.error(it.message)
 //            }
 //        }
-        val orderList = orderServiceClient.getOrders(userId)
+
+        /* ErrorDecoder */
+//        val orderList = orderServiceClient.getOrders(userId)
+
+        log.info("Before call orders microservice")
+        val circuitBreaker = circuitBreakerFactory.create("circuitbreaker")
+        val orderList: List<ResponseOrder> = circuitBreaker.run({ orderServiceClient.getOrders(userId) }, { listOf() })
+        log.info("After called orders microservice")
 
         userDto.orders = orderList
 
