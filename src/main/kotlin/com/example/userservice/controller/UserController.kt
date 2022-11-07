@@ -5,17 +5,13 @@ import com.example.userservice.service.UserService
 import com.example.userservice.vo.Greeting
 import com.example.userservice.vo.RequestUser
 import com.example.userservice.vo.ResponseUser
+import io.micrometer.core.annotation.Timed
 import org.modelmapper.ModelMapper
 import org.modelmapper.convention.MatchingStrategies
 import org.springframework.core.env.Environment
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 
 @RestController
@@ -26,6 +22,7 @@ class UserController(
 ) {
 
     @GetMapping("/health_check")
+    @Timed(value = "users.status", longTask = true)
     fun status(): String {
         return "It's Working in User Service" +
                 ", PORT(local.server.port) = ${env.getProperty("local.server.port")}" +
@@ -35,6 +32,7 @@ class UserController(
     }
 
     @GetMapping("/welcome")
+    @Timed(value = "users.welcome", longTask = true)
     fun welcome(): String? {
 //        return env.getProperty("greeting.message")
         return greeting.message
@@ -55,7 +53,7 @@ class UserController(
     }
 
     @GetMapping("/users")
-    fun getUsers():ResponseEntity<List<ResponseUser>> {
+    fun getUsers(): ResponseEntity<List<ResponseUser>> {
         val userList = userService.getUserByAll()
 
         val result = mutableListOf<ResponseUser>()
